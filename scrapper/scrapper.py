@@ -1,10 +1,11 @@
+import datetime
 from typing import List
 import feedparser
 
 from scrapper.updateinfo import UpdateInfo
 
 
-class Updater:
+class Scrapper:
     __observers: List
 
     def start(self):
@@ -28,7 +29,7 @@ class Updater:
         return [
             UpdateInfo(title=entry.title,
                        description=entry.summary,
-                       publication_date=entry.published,
+                       publication_date=datetime.datetime(*(entry.published_parsed[0:6])),
                        game_id=game_id)
             for entry in feed.entries
         ]
