@@ -4,7 +4,7 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from .manager import AbstractFetchSingleEntity
-from db.models import Update, GameBasedChannel
+from db.models import Update, GameBasedChannel, Game
 
 from scrapper.updateinfo import UpdateInfo
 
@@ -28,14 +28,21 @@ class UpdatesManager(AbstractFetchSingleEntity):
             .first()
 
     @staticmethod
-    def get_game_based_channel(session: Session, game_id: int) -> GameBasedChannel:
+    def get_game_based_channel(session: Session, game_steam_id: int) -> GameBasedChannel:
+        game = session. \
+            query(Game). \
+            filter(Game.steam_id == game_steam_id). \
+            first()
+        if game is None:
+            raise ValueError(f"game with steam_id={game_steam_id} found")
+
         channel = session. \
             query(GameBasedChannel). \
-            filter(GameBasedChannel.game_id == game_id). \
+            filter(GameBasedChannel.game_id == game.id). \
             first()
         if channel is None:
             raise ValueError(f"game based channel for "
-                             f"game with id={game_id} not found")
+                             f"game with steam_id={game_steam_id} not found")
 
         return channel
 
