@@ -4,8 +4,11 @@ from db.models import Game, User
 
 
 class UserManager:
-    def get_subscribes(self, game: Game) -> List[User]:
+
+    @staticmethod
+    def get_subscribes(game: Game) -> List[User]:
         pass
 
-    def get_firebase_tokens(self, user: User) -> List[str]:
+    @staticmethod
+    def get_firebase_tokens(user: User) -> List[str]:
         pass

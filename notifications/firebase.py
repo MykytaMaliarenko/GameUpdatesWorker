@@ -3,7 +3,8 @@ from scrapper.updateinfo import UpdateInfo
 
 
 class FirebasePopupNotifications:
-    __firebase_key: str
+    __firebase_server_key: str
 
-    def __notify_user(self, user: User, update_info: UpdateInfo):
+    @staticmethod
+    def notify_user(user: User, update_info: UpdateInfo) -> None:
         pass
