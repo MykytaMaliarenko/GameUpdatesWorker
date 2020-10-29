@@ -1,13 +1,10 @@
 from abc import abstractmethod
 
-from db.managers.users import UserManager
-from notifications.firebase import FirebasePopupNotifications
-from scrapper import Scrapper
+from scrapper.updateinfo import UpdateInfo
 
 
 class UpdateObserver:
 
     @abstractmethod
-    def update(self, scrapper: Scrapper) -> None:
-        for user in UserManager.get_subscribes(scrapper.game):
-            FirebasePopupNotifications.notify_user(user, scrapper.last_update)
+    def update(self, update_info: UpdateInfo):
+        pass

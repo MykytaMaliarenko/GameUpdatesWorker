@@ -6,5 +6,5 @@ class FirebasePopupNotifications:
     __firebase_server_key: str
 
     @staticmethod
-    def notify_user(user: User, update_info: UpdateInfo) -> None:
+    def notify_user(user: User, update_info: UpdateInfo):
         pass
