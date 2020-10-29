@@ -1,36 +1,50 @@
-import asyncio
 import datetime
-from typing import List, Dict
-
+import time
 import aiohttp
-import feedparser
-from bs4 import BeautifulSoup
+import asyncio
 
+from bs4 import BeautifulSoup
+from typing import List, Dict
+import feedparser
+
+from db.models import Game
 from scrapper.observer import UpdateObserver
 from scrapper.updateinfo import UpdateInfo
 
 
 class Scrapper:
 
-    def __init__(self):
+    def __init__(self, game: Game):
+        self.game = game
         self.__observers: List[UpdateObserver] = []
+        self.last_update = self.__load_updates()[-1]
 
-    def __notify_observers(self, update_info: UpdateInfo) -> None:
+    def __notify_observers(self, scrapper) -> None:
         for observer in self.__observers:
-            observer.update(update_info)
+            observer.update(scrapper)
 
     def register_observer(self, observer: UpdateObserver) -> None:
         if observer not in self.__observers:
             self.__observers.append(observer)
+        else:
+            print(f'Failed to add: {observer}')
 
     def unregister_observer(self, observer: UpdateObserver) -> None:
-        self.__observers.remove(observer)
+        try:
+            self.__observers.remove(observer)
+        except ValueError:
+            print(f'Failed to remove: {observer}')
 
-    def __remove(self, observer_to_remove):
-        for index, observer in enumerate(self.__observers):
-            if observer == observer_to_remove:
-                del self.__observers[index]
-                return
+    def __if_game_has_new_update(self) -> None:
+        __current_update = self.__load_updates()[-1]
+        if self.last_update == __current_update:
+            self.last_update = __current_update
+            self.__notify_observers(self)
+
+    def permanent_update_check(self):
+        while True:
+            self.__if_game_has_new_update()
+            time.sleep(60)
 
     @staticmethod
     async def __get_metadata(session, url: str, result: List[Dict[str, str]]):
@@ -57,9 +71,8 @@ class Scrapper:
         loop.close()
         return res
 
-    @staticmethod
-    def __load_updates(game_id: int) -> List[UpdateInfo]:
-        feed = feedparser.parse("https://store.steampowered.com/feeds/newshub/app/" + str(game_id))
+    def __load_updates(self) -> List[UpdateInfo]:
+        feed = feedparser.parse("https://store.steampowered.com/feeds/newshub/app/" + str(self.game))
         if feed.status != 200 or len(feed.entries) == 0:
             raise Exception('rss feed doesn`t exist')
 
@@ -69,7 +82,7 @@ class Scrapper:
             UpdateInfo(title=entry.title,
                        description=entry.summary,
                        publication_date=datetime.datetime(*(entry.published_parsed[0:6])),
-                       game_id=game_id,
+                       game_id=self.game,
                        origin_url=entry.link,
                        short_description=entries_metedata[index]['description'],
                        image_url=entries_metedata[index]['image_url'])
