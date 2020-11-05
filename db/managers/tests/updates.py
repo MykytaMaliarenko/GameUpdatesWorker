@@ -1,22 +1,18 @@
 import unittest
 import datetime
-from sqlalchemy.orm import Session
 
 from db.instance import DBInstance
 from db.managers.updates import UpdatesManager
 from db.models import Game, GameBasedChannel, Update
 from db.models.base import Base
+from db.managers.tests import init_test_session
 
 from scrapper.updateinfo import UpdateInfo
-import main
 
 
 class TestUpdatesManager(unittest.TestCase):
     def setUp(self):
-        main.init_local_env(f"../../../{main.LOCAL_ENV}")
-        self.session: Session = DBInstance.get_instance(is_test=True).new_session()
-
-        Base.metadata.create_all(DBInstance.engine())
+        self.session = init_test_session()
 
         self.game = Game(name='test game', steam_id=0)
         self.session.add(self.game)
