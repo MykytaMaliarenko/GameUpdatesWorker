@@ -44,7 +44,7 @@ class TestUpdatesManager(unittest.TestCase):
 
     def test_get_game_based_channel(self):
         expected = self.channel
-        result = UpdatesManager.get_game_based_channel(self.session, game_id=self.game.id)
+        result = UpdatesManager.get_game_based_channel(self.session, game_steam_id=self.game.steam_id)
         self.assertEqual(result, expected)
 
     def test_create_update(self):
@@ -53,7 +53,9 @@ class TestUpdatesManager(unittest.TestCase):
             description='test desc',
             publication_date=datetime.datetime.now(),
             origin_url='origin',
-            game_id=self.game.id
+            game_id=self.game.id,
+            image_url='',
+            short_description='test short'
         )
 
         UpdatesManager.create_update(self.session, update_info)
@@ -68,7 +70,9 @@ class TestUpdatesManager(unittest.TestCase):
             description='test desc',
             publication_date=datetime.datetime.now(),
             origin_url='origin',
-            game_id=self.game.id
+            game_id=self.game.id,
+            image_url='',
+            short_description='test short'
         )
         UpdatesManager.create_update(self.session, update_info)
 
@@ -77,10 +81,12 @@ class TestUpdatesManager(unittest.TestCase):
             description='test desc2',
             publication_date=datetime.datetime.now() + datetime.timedelta(0, 3),
             origin_url='origin2',
-            game_id=self.game.id
+            game_id=self.game.id,
+            image_url='',
+            short_description='test short2'
         )
         UpdatesManager.create_update(self.session, update_info_2)
 
-        update = UpdatesManager.get_last_update(self.session, self.game.id)
+        update = UpdatesManager.get_last_update(self.session, game_id=self.game.id)
         self.assertEqual(update.title, "test title2")
         self.session.query(Update).delete()
