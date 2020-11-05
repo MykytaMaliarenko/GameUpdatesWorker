@@ -6,24 +6,24 @@ import aiohttp
 import feedparser
 from bs4 import BeautifulSoup
 
-from scrapper.observer import UpdateObserver
+from scrapper.observer import AbstractObserver
 from scrapper.updateinfo import UpdateInfo
 
 
 class Scrapper:
 
     def __init__(self):
-        self.__observers: List[UpdateObserver] = []
+        self.__observers: List[AbstractObserver] = []
 
     def __notify_observers(self, update_info: UpdateInfo) -> None:
         for observer in self.__observers:
             observer.update(update_info)
 
-    def register_observer(self, observer: UpdateObserver) -> None:
+    def register_observer(self, observer: AbstractObserver) -> None:
         if observer not in self.__observers:
             self.__observers.append(observer)
 
-    def unregister_observer(self, observer: UpdateObserver) -> None:
+    def unregister_observer(self, observer: AbstractObserver) -> None:
         self.__observers.remove(observer)
 
     @staticmethod
