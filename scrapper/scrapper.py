@@ -1,28 +1,30 @@
-import datetime
-import aiohttp
 import asyncio
-
-from bs4 import BeautifulSoup
+import datetime
 from typing import List, Dict
-import feedparser
 
+import aiohttp
+import feedparser
+from bs4 import BeautifulSoup
+
+from scrapper.observer import AbstractObserver
 from scrapper.updateinfo import UpdateInfo
 
 
 class Scrapper:
-    __observers: List
 
-    def start(self):
-        pass
+    def __init__(self):
+        self.__observers: List[AbstractObserver] = []
 
-    def __notify_observers(self, update_info: UpdateInfo):
-        pass
+    def __notify_observers(self, update_info: UpdateInfo) -> None:
+        for observer in self.__observers:
+            observer.update(update_info)
 
-    def register_observer(self, observer):
-        pass
+    def register_observer(self, observer: AbstractObserver) -> None:
+        if observer not in self.__observers:
+            self.__observers.append(observer)
 
-    def unregister_observer(self, observer):
-        pass
+    def unregister_observer(self, observer: AbstractObserver) -> None:
+        self.__observers.remove(observer)
 
     @staticmethod
     async def __get_metadata(session, url: str, result: List[Dict[str, str]]):
@@ -50,7 +52,7 @@ class Scrapper:
         return res
 
     @staticmethod
-    def load_updates(game_id: int) -> List[UpdateInfo]:
+    def __load_updates(game_id: int) -> List[UpdateInfo]:
         feed = feedparser.parse("https://store.steampowered.com/feeds/newshub/app/" + str(game_id))
         if feed.status != 200 or len(feed.entries) == 0:
             raise Exception('rss feed doesn`t exist')
