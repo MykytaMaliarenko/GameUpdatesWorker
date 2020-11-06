@@ -90,3 +90,7 @@ class TestUpdatesManager(unittest.TestCase):
         update = UpdatesManager.get_last_update(self.session, game_id=self.game.id)
         self.assertEqual(update.title, "test title2")
         self.session.query(Update).delete()
+
+    def test_get_last_update_not_exists(self):
+        update = UpdatesManager.get_last_update(self.session, game_id=self.game.id)
+        self.assertEqual(update, None)
