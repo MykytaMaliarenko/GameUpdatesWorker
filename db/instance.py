@@ -1,6 +1,6 @@
 import os
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
 
 class DBInstance:
@@ -34,7 +34,7 @@ class DBInstance:
 
         return wrapper
 
-    def new_session(self):
+    def new_session(self) -> Session:
         return self.__Session()
 
     @staticmethod
