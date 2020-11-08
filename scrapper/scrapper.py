@@ -38,6 +38,8 @@ class Scrapper:
                 logger.info(f"start polling updates for {game.name}")
                 if not UpdatesManager.has_game_based_channel(session, game.steam_id):
                     logger.warning(f"game based channel was not found {game.name}")
+                    session.close()
+                    logger.info(f"session closed")
                     continue
 
                 try:
