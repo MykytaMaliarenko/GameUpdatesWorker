@@ -3,6 +3,8 @@ import json
 import sys
 from loguru import logger
 
+from scrapper.scrapper import Scrapper
+
 LOCAL_ENV = "env_local.json"
 
 
@@ -37,7 +39,13 @@ def init_logger():
 
 
 def main():
-    pass
+    scrapper = Scrapper()
+
+    while True:
+        try:
+            scrapper.start()
+        except Exception as exc:
+            logger.exception(exc)
 
 
 if __name__ == "__main__":
