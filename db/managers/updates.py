@@ -1,11 +1,12 @@
-from .exceptions import GameNotFoundBySteamIdException, GameBasedChannelNotFoundException
+from .exceptions import GameBasedChannelNotFoundException
 from typing import Any, Union
 
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from .manager import AbstractFetchSingleEntity
-from db.models import Update, GameBasedChannel, Game
+from db.managers.games import GamesManager
+from db.models import Update, GameBasedChannel
 
 from scrapper.updateinfo import UpdateInfo
 
@@ -13,15 +14,15 @@ from scrapper.updateinfo import UpdateInfo
 class UpdatesManager(AbstractFetchSingleEntity):
     @staticmethod
     def create_update(session: Session, update_info: UpdateInfo):
-        channel = UpdatesManager.get_game_based_channel(session, game_id=update_info.game_id)
+        channel = UpdatesManager.get_game_based_channel(session, update_info.steam_id)
 
         update = Update.from_update_info(update_info)
         session.add(update)
         update.channel = channel
 
     @staticmethod
-    def get_last_update(session: Session, game_id: int) -> Union[None, Update]:
-        channel = UpdatesManager.get_game_based_channel(session, game_id=game_id)
+    def get_last_update(session: Session, steam_id: int) -> Union[None, Update]:
+        channel = UpdatesManager.get_game_based_channel(session, steam_id)
         return session\
             .query(Update)\
             .filter(GameBasedChannel.id == channel.id)\
@@ -29,26 +30,26 @@ class UpdatesManager(AbstractFetchSingleEntity):
             .first()
 
     @staticmethod
+    def has_game_based_channel(session: Session, steam_id: int) -> bool:
+        try:
+            UpdatesManager.get_game_based_channel(session, steam_id)
+            return True
+        except GameBasedChannelNotFoundException:
+            return False
+
+    @staticmethod
     def get_game_based_channel(
             session: Session,
-            game_steam_id: int = None,
-            game_id: int = None) -> GameBasedChannel:
+            steam_id: int) -> GameBasedChannel:
 
-        if game_id is None:
-            game = session. \
-                query(Game). \
-                filter(Game.steam_id == game_steam_id). \
-                first()
-            if game is None:
-                raise GameNotFoundBySteamIdException(game_steam_id)
-            game_id = game.id
+        game = GamesManager.get_game_by_steam_id(session, steam_id)
 
         channel = session. \
             query(GameBasedChannel). \
-            filter(GameBasedChannel.game_id == game_id). \
+            filter(GameBasedChannel.game_id == game.id). \
             first()
         if channel is None:
-            raise GameBasedChannelNotFoundException(game_steam_id)
+            raise GameBasedChannelNotFoundException()
 
         return channel
 
