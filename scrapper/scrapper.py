@@ -17,14 +17,14 @@ from db.managers.updates import UpdatesManager
 import db.managers.exceptions as db_exceptions
 from db.models import Game
 
-from scrapper.observer import AbstractObserver
+from scrapper.observer import IObserver, IObservable
 from scrapper.updateinfo import UpdateInfo
 
 
-class Scrapper:
+class Scrapper(IObservable):
 
     def __init__(self):
-        self.__observers: List[AbstractObserver] = []
+        self.__observers: List[IObserver] = []
 
     def start(self, sleep_time: int = 300):
         while True:
@@ -58,7 +58,7 @@ class Scrapper:
                             UpdatesManager.create_update(session, update)
                             logger.info(f"added to session")
 
-                            self.__notify_observers(update)
+                            self.notify_observers(update)
                             logger.info(f"notified all observers")
 
                     session.commit()
@@ -73,15 +73,15 @@ class Scrapper:
 
             time.sleep(sleep_time)
 
-    def __notify_observers(self, update_info: UpdateInfo) -> None:
+    def notify_observers(self, update_info: UpdateInfo):
         for observer in self.__observers:
             observer.update(update_info)
 
-    def register_observer(self, observer: AbstractObserver) -> None:
+    def register_observer(self, observer: IObserver):
         if observer not in self.__observers:
             self.__observers.append(observer)
 
-    def unregister_observer(self, observer: AbstractObserver) -> None:
+    def unregister_observer(self, observer: IObserver):
         self.__observers.remove(observer)
 
     @staticmethod
