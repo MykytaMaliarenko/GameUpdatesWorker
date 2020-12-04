@@ -1,7 +1,7 @@
 import time
 import asyncio
 import datetime
-from typing import List, Dict
+from typing import List, Dict, Union
 
 import aiohttp
 import pytz
@@ -109,6 +109,11 @@ class Scrapper(IObservable):
         return res
 
     @staticmethod
+    def __rss_get_image(entry) -> Union[str, None]:
+        links = list(filter(lambda link: 'image' in link.type, entry.links))
+        return links[0].href if len(links) > 0 else None
+
+    @staticmethod
     def __load_updates(steam_id: int) -> List[UpdateInfo]:
         feed = feedparser.parse("https://store.steampowered.com/feeds/newshub/app/" + str(steam_id))
         if feed.status != 200 or len(feed.entries) == 0:
@@ -117,13 +122,19 @@ class Scrapper(IObservable):
         links = [entry.link for entry in feed.entries]
         entries_metedata = Scrapper.__get_all_metadata(links)
 
-        return [
-            UpdateInfo(title=entry.title,
-                       description=entry.summary,
-                       publication_date=datetime.datetime(*(entry.published_parsed[0:6])),
-                       steam_id=steam_id,
-                       origin_url=entry.link,
-                       short_description=entries_metedata[index]['description'],
-                       image_url=entries_metedata[index]['image_url'])
-            for index, entry in enumerate(feed.entries)
-        ]
+        res = []
+        for index, entry in enumerate(feed.entries):
+            image_rss = Scrapper.__rss_get_image(entry)
+            image = image_rss if image_rss is not None else entries_metedata[index]['image_url']
+            res.append(
+                UpdateInfo(title=entry.title,
+                           description=entry.summary,
+                           publication_date=datetime.datetime(*(entry.published_parsed[0:6])),
+                           steam_id=steam_id,
+                           origin_url=entry.link,
+                           short_description=entries_metedata[index]['description'],
+                           image_url=image)
+                for index, entry in enumerate(feed.entries)
+            )
+
+        return res
