@@ -25,7 +25,7 @@ class UpdatesManager(AbstractFetchSingleEntity):
         channel = UpdatesManager.get_game_based_channel(session, steam_id)
         return session\
             .query(Update)\
-            .filter(GameBasedChannel.id == channel.id)\
+            .filter(Update.channel_id == channel.id)\
             .order_by(desc(Update.publication_date))\
             .first()
 
