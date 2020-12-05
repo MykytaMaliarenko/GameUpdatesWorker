@@ -10,4 +10,4 @@ class User(Base):
     email = Column(Text)
     is_active = Column(Boolean)
 
-    notification_settings_id = Column(Integer, ForeignKey('notifications_notificationsettings.id'))
+    #notification_settings_id = Column(Integer, ForeignKey('notifications_notificationsettings.id'))
