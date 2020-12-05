@@ -14,6 +14,7 @@ from .exceptions import FeedDoesntExist
 from db.instance import DBInstance
 from db.managers.games import GamesManager
 from db.managers.updates import UpdatesManager
+from db.managers.channels import GameBasedChannelsManager
 import db.managers.exceptions as db_exceptions
 from db.models import Game
 
@@ -36,7 +37,7 @@ class Scrapper(IObservable):
                 session = DBInstance.get_instance().new_session()
 
                 logger.info(f"start polling updates for {game.name}")
-                if not UpdatesManager.has_game_based_channel(session, game.steam_id):
+                if not GameBasedChannelsManager.has_game_based_channel(session, game.steam_id):
                     logger.warning(f"game based channel was not found {game.name}")
                     session.close()
                     logger.info(f"session closed")
@@ -134,7 +135,6 @@ class Scrapper(IObservable):
                            origin_url=entry.link,
                            short_description=entries_metedata[index]['description'],
                            image_url=image)
-                for index, entry in enumerate(feed.entries)
             )
 
         return res

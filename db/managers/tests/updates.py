@@ -12,6 +12,7 @@ from scrapper.updateinfo import UpdateInfo
 
 
 class TestUpdatesManager(unittest.TestCase):
+    # noinspection DuplicatedCode
     def setUp(self):
         self.session = init_test_session()
 
@@ -42,11 +43,6 @@ class TestUpdatesManager(unittest.TestCase):
         result = UpdatesManager.get_by_id(self.session, expected.id)
         self.assertEqual(expected, result)
         self.session.delete(result)
-
-    def test_get_game_based_channel(self):
-        expected = self.channel
-        result = UpdatesManager.get_game_based_channel(self.session, self.game.steam_id)
-        self.assertEqual(result, expected)
 
     def test_create_update(self):
         update_info = UpdateInfo(
