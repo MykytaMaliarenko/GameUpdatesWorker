@@ -15,12 +15,13 @@ class User(Base):
 class Subscription(Base):
     __tablename__ = 'users_subscription'
 
+    id = Column(Integer, primary_key=True)
     notify = Column(Boolean, default=False)
 
     game_based_channel_id = Column(Integer,
                                    ForeignKey('channels_gamebasedchannel.id'),
                                    nullable=True)
-    game_based_channel = relationship("GameBasedChannel", nullable=True)
+    game_based_channel = relationship("GameBasedChannel", back_populates="subscriptions")
 
     user_id = Column(Integer, ForeignKey('users_myuser.id'))
-    user = relationship("User", back_populates="subscriptions")
+    user = relationship("User")

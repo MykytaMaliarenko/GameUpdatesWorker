@@ -13,6 +13,8 @@ class GameBasedChannel(Base):
     game_id = Column(Integer, ForeignKey('games_game.id'))
     game = relationship("Game")
 
+    subscriptions = relationship("Subscription")
+
     def __eq__(self, other):
         assert(isinstance(other, GameBasedChannel))
         return other.id == self.id
