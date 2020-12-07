@@ -2,7 +2,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from .exceptions import GameBasedChannelNotFoundException
+from .exceptions import GameBasedChannelNotFoundException, GameNotFoundException
 
 from db.models import GameBasedChannel
 from .games import GamesManager
@@ -14,9 +14,11 @@ class GameBasedChannelsManager(AbstractFetchSingleEntity):
     @staticmethod
     def has_game_based_channel(session: Session, steam_id: int) -> bool:
         try:
-            GameBasedChannelsManager.get_game_based_channel(session, steam_id)
-            return True
-        except GameBasedChannelNotFoundException:
+            game = GamesManager.get_game_by_steam_id(session, steam_id)
+            return session\
+                .query(session.query(GameBasedChannel).filter(GameBasedChannel.game_id == game.id).exists())\
+                .scalar()
+        except GameNotFoundException:
             return False
 
     @staticmethod

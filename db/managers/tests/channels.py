@@ -30,3 +30,10 @@ class TestGameBasedChannelsManager(unittest.TestCase):
         expected = self.channel
         result = GameBasedChannelsManager.get_game_based_channel(self.session, self.game.steam_id)
         self.assertEqual(result, expected)
+
+    def test_has_game_based_channel(self):
+        self.assertEqual(GameBasedChannelsManager.has_game_based_channel(self.session, -1), False)
+        self.assertEqual(
+            GameBasedChannelsManager.has_game_based_channel(self.session, self.game.steam_id),
+            True
+        )
