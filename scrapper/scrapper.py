@@ -46,6 +46,7 @@ class Scrapper(IObservable):
                 try:
                     last_update_in_db = UpdatesManager.get_last_update(session, game.steam_id)
 
+                    new_updates = list()
                     updates = self.__load_updates(game.steam_id)
                     for update in updates:
                         update_date = pytz.UTC.localize(update.publication_date)
@@ -59,11 +60,14 @@ class Scrapper(IObservable):
                             UpdatesManager.create_update(session, update)
                             logger.info(f"added to session")
 
-                            self.notify_observers(update)
-                            logger.info(f"notified all observers")
+                            new_updates.append(update)
 
                     session.commit()
                     logger.info(f"session committed")
+
+                    for update in new_updates:
+                        self.notify_observers(update)
+                    logger.info(f"notified all observers")
                 except (db_exceptions.GameBasedChannelNotFoundException, FeedDoesntExist) as err:
                     session.rollback()
                     logger.info(f"session rollback")

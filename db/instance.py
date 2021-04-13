@@ -3,9 +3,17 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
 
-class DBInstance:
+class MetaSingleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(MetaSingleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class DBInstance(metaclass=MetaSingleton):
     __engine = None
-    __instance = None
     __Session = None
 
     def __init__(self, is_test: bool = False):
@@ -43,8 +51,4 @@ class DBInstance:
 
     @classmethod
     def get_instance(cls, **kwargs):
-        assert cls is DBInstance
-        if not cls.__instance:
-            cls.__instance = DBInstance(**kwargs)
-
-        return cls.__instance
+        return DBInstance(**kwargs)

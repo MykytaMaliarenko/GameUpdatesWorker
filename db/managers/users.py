@@ -1,14 +1,10 @@
-from typing import List
+from typing import Generator
 
-from db.models import Game, User
+from db.models import User, GameBasedChannel
 
 
 class UserManager:
 
     @staticmethod
-    def get_subscribes(game: Game) -> List[User]:
-        pass
-
-    @staticmethod
-    def get_firebase_tokens(user: User) -> List[str]:
-        pass
+    def get_subscribes(channel: GameBasedChannel) -> Generator[User]:
+        return (subscription.user for subscription in channel.subscriptions)
